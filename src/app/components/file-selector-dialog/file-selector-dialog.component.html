@@ -1,0 +1,22 @@
+<h2 mat-dialog-title>
+    Fájlok kiválasztása
+</h2>
+<mat-dialog-content>
+    <button mat-raised-button color="accent" (click)="clickOnFileInput()">Add File</button>
+    <input type="file" id="fileInput" #fileInput 
+            (change)="handleFileInput($event.target.files)" 
+            style="display: none;" 
+            [multiple]="isMultipleFileAllowed"
+            [accept]="acceptableExtensions"
+            >
+    <!-- <div class="form-group">
+        <input type="file" id="file" (change)="handleFileInput($event.target.files)">
+    </div> -->
+    <div class="col-md-8 link-row"   *ngFor="let item of data.files;">
+        <a [href]="item.downloadUrl" [ngClass]="{'file-link' : isUrl(item)}">{{item.fileName}}</a> {{item.size | filesize}}
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button mat-raised-button (click)="onCancel()">Cancel</button>
+    <button mat-raised-button (click)="onOk()" color="primary">Ok</button>
+</mat-dialog-actions>
