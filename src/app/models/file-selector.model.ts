@@ -1,19 +1,20 @@
 import { Guid } from '../utilities/classes/Guid';
 
 export class FileSelectorModel {
-    constructor() {
-        
+    constructor(files: FileModel[] = []) {
+        this.files = files;
     }
     files: FileModel[];
 }
 
 export class FileModel {
-    constructor(fileName: string, externalId: string, size = 0, downloadUrl = '') {
+    constructor(fileName: string, externalId: string, size = 0, downloadUrl = null, content: string | ArrayBuffer = null) {
         this._name = fileName;
         this._externalId = externalId;
         this._uniqueId = Guid.newGuid();
         this._size = size;
         this._downloadUrl = downloadUrl;
+        this._content = content
     }
     private _name: string;
     public get fileName(): string { return this._name; }
@@ -31,15 +32,17 @@ export class FileModel {
     public get downloadUrl(): string { return this._downloadUrl; }
 
     private _content: string | ArrayBuffer;
+    public get content(): string | ArrayBuffer { return this._content; }
+
     /**
      * addFileContent
      */
     public addFileContent(file: File) {
-        let fileReader = new FileReader();
-        fileReader.onload = (e) => {
-          console.log(fileReader.result);
-        }
-        fileReader.readAsText(file)
-        this._content = fileReader.result;
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        // Once loaded, do something with the string
+        reader.addEventListener('load', (event) => {
+            this._content = event.target.result;
+        });
     }
 }

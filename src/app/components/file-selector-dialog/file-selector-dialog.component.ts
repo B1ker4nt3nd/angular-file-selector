@@ -1,7 +1,9 @@
+import { Guid } from './../../utilities/classes/Guid';
 import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DialogWrapperModel } from 'src/app/models/dialog-wrapper-model';
 import { FileModel, FileSelectorModel } from 'src/app/models/file-selector.model';
+import { DialogConfiguration } from 'src/app/models/dialog-configuration';
 
 @Component({
   selector: 'app-file-selector-dialog',
@@ -12,7 +14,11 @@ export class FileSelectorDialogComponent implements OnInit {
   @ViewChild('fileInput') fileInput: ElementRef;
 
   private initialData: FileSelectorModel;
-
+  
+  public get configuration() : DialogConfiguration {
+    return this.inputInformation.configuration;
+  }
+  
   private _data : FileSelectorModel;
   public get data() : FileSelectorModel {
     return this._data;
@@ -34,6 +40,41 @@ export class FileSelectorDialogComponent implements OnInit {
     // this.data = this.inputInformation.fileSelectorModel;
   }
 
+  public handleFileInput(files: FileList) {
+    for (let index = 0; index < files.length; index++) {
+      const file = files[index];
+      if (this.configuration.maximumFileSize > 0 && file.size > this.configuration.maximumFileSize) {
+        // TODO
+        console.log('Maximum file size error');
+        break;
+      }
+
+      const fileModel = new FileModel(file.name, '', file.size, Guid.newGuid());
+      fileModel.addFileContent(file);
+      this.data.files.push(fileModel);
+      console.log(`test: ${this.data.files.map(x => x.size).reduce((sum, current) => sum + current, 0)}`);
+      if (this.configuration.maximumCombinedFileSize > 0 &&
+        this.data.files.map(x => x.size).reduce((sum, current) => sum + current, 0) > this.configuration.maximumCombinedFileSize) {
+      // TODO
+      this.data.files.pop();
+      console.log('Maximum Combined file size error');
+      break;
+    }
+    }
+
+    
+    // this.fileToUpload = files.item(0);
+    // Array.from(files).forEach(file => { 
+    //   if (this.configuration.maximumFileSize > 0 && file.size > this.configuration.maximumFileSize) {
+    //     // TODO
+    //     console.log('Maximum file size error');
+    //   }
+    //   const fileModel = new FileModel(file.name, '', file.size, Guid.newGuid());
+    //   fileModel.addFileContent(file);
+    //   this.data.files.push(fileModel);
+    //  });
+  }
+
   public onOk(){
     this.dialogRef.close(this.data);
   }
@@ -45,36 +86,25 @@ export class FileSelectorDialogComponent implements OnInit {
   public isUrl(item: FileModel) : boolean {
     return item.downloadUrl !== '';
   }
-  public handleFileInput(files: FileList) {
-    // this.fileToUpload = files.item(0);
-    Array.from(files).forEach(file => { 
-      const fileModel = new FileModel(file.name, '', file.size, '');
-      fileModel.addFileContent(file);
-      this.data.files.push(fileModel);
-     });
-  }
+
   public clickOnFileInput() {
     this.fileInput.nativeElement.click();
   }
   
   public get isMultipleFileAllowed() : boolean {
-    return this.inputInformation.configuration.fileNumberLimit > 1;
+    return this.configuration.fileNumberLimit > 1;
   }
   
   public get acceptableExtensions() : string {
-    return this.inputInformation.configuration.acceptableExtensions;
+    return this.configuration.acceptableExtensions;
   }
   private clone(source: FileSelectorModel): FileSelectorModel {
-    // const cloneObject: FileSelectorModel = { ...source } as FileSelectorModel;
-    let cloneObject = Object.create(source) as FileSelectorModel;
-    // cloneObject = { ...source } as FileSelectorModel
-
-    cloneObject.files = [];
-    source.files.forEach((item: FileModel) => {
-      // const cloneItem: FileModel = { ...item } as FileModel;
-      const cloneItem: FileModel = Object.create(item) as FileModel;
-      cloneObject.files.push(cloneItem);
-    });
-    return cloneObject;
+      const files: FileModel[] = []
+      source.files.forEach((file: FileModel) => {
+        const newFile: FileModel = new FileModel(file.fileName, file.externalId, file.size, file.downloadUrl, file.content);
+        files.push(newFile);
+      })
+      const model = new FileSelectorModel(files);
+      return model;
   }
 }

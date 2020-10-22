@@ -14,13 +14,15 @@ import { FileSelectorDialogComponent } from './components/file-selector-dialog/f
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DisplayFileSizePipe } from './utilities/pipes/display-file-size-pipe';
+import { ExampleComponent } from './components/example/example.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     FileSelectorComponent,
     FileSelectorDialogComponent,
-    DisplayFileSizePipe
+    DisplayFileSizePipe,
+    ExampleComponent
   ],
   imports: [
     CommonModule,

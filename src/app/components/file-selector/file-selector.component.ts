@@ -12,37 +12,22 @@ import { Configuration } from 'src/app/models/configuration';
 })
 export class FileSelectorComponent implements OnInit {
 
-  constructor(public dialog: MatDialog) {
-    // test start
-    // data
-    const files = [];
-    const file1 = new FileModel('test1', 'asdfghjkl');
-    files.push(file1);
-    const file2 = new FileModel('test2', 'qwertzuiop');
-    files.push(file2);
-    this.data = { files : files };
-    // configuration
-    this.configuration = {  
-                            badgeColor: 'accent', 
-                            dialogConfiguration: { fileNumberLimit: 3, acceptableExtensions: '.txt,.docx,.doc' } 
-                          };
-    // test end
-  }
+  constructor(public dialog: MatDialog) {}
   @Input() configuration: Configuration;
-  @Input() data: FileSelectorModel;
+  @Input() fileModels: FileSelectorModel;
 
   ngOnInit(): void {
   }
 
   
   public get badgeValue() : string {
-    return this.data?.files?.length.toString() ?? '0';
+    return this.fileModels?.files?.length.toString() ?? '0';
   }
-  
 
   openFileDialog(): void {
-    const data = new DialogWrapperModel(this.data, this.configuration.dialogConfiguration);
+    const data = new DialogWrapperModel(this.fileModels, this.configuration.dialogConfiguration);
     const dialogRef = this.dialog.open(FileSelectorDialogComponent, {
+      autoFocus: false,
       width: '80%',
       data: data,
       disableClose: true
@@ -50,7 +35,20 @@ export class FileSelectorComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result: FileSelectorModel)  => {
       console.log('The dialog was closed');
-      this.data = result;
+      this.fileModels = result;
     });
   }
+  
+  public get badgeColor() : string {
+    return this.configuration.badgeColor ?? 'accent';
+  }
+  
+  public get buttonColor() : string {
+    return this.configuration.buttonColor ?? 'primary';
+  }
+  
+  public get buttonText() : string {
+    return this.configuration.translates['buttonText'];
+  }
+  
 }

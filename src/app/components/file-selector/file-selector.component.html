@@ -1,11 +1,12 @@
 <div class="container file-selector-container">
-    <div class="row">
-      <div class="col-md-12">
-        <button mat-raised-button color="primary" (click)="openFileDialog()" 
-                [matBadge]="badgeValue" [matBadgeColor]="configuration.badgeColor">
-            <mat-icon>attach_file</mat-icon>
-            Fájl csatolás
-        </button>
-      </div>
+  <div class="row">
+    <div class="col-md-12">
+      <button mat-raised-button color="primary" (click)="openFileDialog()" 
+              [matBadge]="badgeValue" [matBadgeColor]="badgeColor" [color]="buttonColor">
+          <mat-icon>attach_file</mat-icon>
+          {{ buttonText }}
+          <!-- Test -->
+      </button>
     </div>
-    </div>
+  </div>
+</div>
