@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DisplayFileSizePipe } from './utilities/pipes/display-file-size-pipe';
 import { ExampleComponent } from './components/example/example.component';
+import { MatCardModule } from '@angular/material/card';
 
 @NgModule({
   declarations: [
@@ -35,7 +36,8 @@ import { ExampleComponent } from './components/example/example.component';
     NgbModule,
     MatIconModule,
     MatBadgeModule,
-    MatDialogModule
+    MatDialogModule,
+    MatCardModule
   ],
   providers: [DisplayFileSizePipe],
   bootstrap: [AppComponent]

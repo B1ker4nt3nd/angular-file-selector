@@ -6,6 +6,6 @@ export class Configuration {
     }
     badgeColor: string;
     buttonColor: string;
-    translates: { [id: string] : string; };
+    translations: { [id: string] : string; };
     dialogConfiguration: DialogConfiguration;
 }

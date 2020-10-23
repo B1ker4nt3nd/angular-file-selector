@@ -1,9 +1,10 @@
 import { DialogWrapperModel } from 'src/app/models/dialog-wrapper-model';
 import { FileSelectorModel, FileModel } from './../../models/file-selector.model';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FileSelectorDialogComponent } from '../file-selector-dialog/file-selector-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Configuration } from 'src/app/models/configuration';
+import { FileSelectorDialogResult } from 'src/app/models/file-selector-dialog-result.model';
 
 @Component({
   selector: 'app-file-selector',
@@ -15,8 +16,10 @@ export class FileSelectorComponent implements OnInit {
   constructor(public dialog: MatDialog) {}
   @Input() configuration: Configuration;
   @Input() fileModels: FileSelectorModel;
-
+  @Output() fileSelectorResult = new EventEmitter<FileSelectorModel>();
+  
   ngOnInit(): void {
+    this.fileSelectorResult.next(this.fileModels);
   }
 
   
@@ -33,9 +36,12 @@ export class FileSelectorComponent implements OnInit {
       disableClose: true
     });
 
-    dialogRef.afterClosed().subscribe((result: FileSelectorModel)  => {
+    dialogRef.afterClosed().subscribe((response: FileSelectorDialogResult)  => {
       console.log('The dialog was closed');
-      this.fileModels = result;
+      if (response.propagateResult) {
+        this.fileModels = response.result;
+        this.fileSelectorResult.next(this.fileModels);
+      }
     });
   }
   
@@ -48,7 +54,7 @@ export class FileSelectorComponent implements OnInit {
   }
   
   public get buttonText() : string {
-    return this.configuration.translates['buttonText'];
+    return this.configuration.translations['buttonText'];
   }
   
 }

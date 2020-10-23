@@ -1,3 +1,36 @@
+.description {
+    width: 90%; 
+    background-color: lightgray;
+    padding: 25px;
+    margin: 5px;
+}
 .link-row {
     font-weight: 500;
+    width: 100%;
+    height: 100%;
+    display: table;
+}
+.delete-icon-container {
+    cursor: pointer;
+    display: table-cell;
+    width: 30px;
+    .mat-icon{
+        transition: background-color 1s ease-out, color 1s ease-out;
+        border-radius: 5px;
+    }
+    .mat-icon:hover{
+        background-color: #e33124 !important;
+        color: #694a48 !important;
+    }
+}
+.file-info-line-container{
+    display: table-cell;
+    vertical-align: middle;
+}
+.upload-button {
+    margin-left: 5px;
+}
+.link-container {
+    padding: 5px;
+    margin: 5px;
 }

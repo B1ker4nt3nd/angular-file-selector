@@ -3,5 +3,5 @@ export class DialogConfiguration {
     acceptableExtensions: string; //comma separated list. for example: '.doc,.docx'
     maximumFileSize: number;
     maximumCombinedFileSize: number;
-    translates: { [id: string] : string; };
+    translations: { [id: string] : string; };
 }

@@ -1,3 +1,4 @@
+import { FileSelectorDialogResult } from './../../models/file-selector-dialog-result.model';
 import { Guid } from './../../utilities/classes/Guid';
 import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -26,7 +27,7 @@ export class FileSelectorDialogComponent implements OnInit {
   public set data(v : FileSelectorModel) {
     this._data = v;
     if (!this.initialData) {
-      this.initialData = this.clone(v);
+      this.initialData = this.clone(v, true);
     }
   }
   
@@ -55,13 +56,12 @@ export class FileSelectorDialogComponent implements OnInit {
       console.log(`test: ${this.data.files.map(x => x.size).reduce((sum, current) => sum + current, 0)}`);
       if (this.configuration.maximumCombinedFileSize > 0 &&
         this.data.files.map(x => x.size).reduce((sum, current) => sum + current, 0) > this.configuration.maximumCombinedFileSize) {
-      // TODO
-      this.data.files.pop();
-      console.log('Maximum Combined file size error');
-      break;
+          // TODO
+          this.data.files.pop();
+          console.log('Maximum Combined file size error');
+          break;
+        }
     }
-    }
-
     
     // this.fileToUpload = files.item(0);
     // Array.from(files).forEach(file => { 
@@ -76,17 +76,37 @@ export class FileSelectorDialogComponent implements OnInit {
   }
 
   public onOk(){
-    this.dialogRef.close(this.data);
+    this.dialogRef.close(new FileSelectorDialogResult(true, this.data));
   }
 
   public onCancel(){
-    this.dialogRef.close(this.initialData);
+    this.dialogRef.close(new FileSelectorDialogResult(false, this.data));
   }
   
+  /**
+   * saveDisabled
+   */
+  public get saveDisabled(): boolean {
+    return this.compareArrays(this.data.files.map((x: FileModel) => x.uniqueId), this.initialData.files.map((x: FileModel) => x.uniqueId));
+  }
+  private compareArrays(array1: string[], array2: string[]): boolean {
+    const array2Sorted = array2.slice().sort();
+    return array1.length === array2.length && array1.slice().sort().every(function(value, index) {
+        return value === array2Sorted[index];
+    });
+  }
   public isUrl(item: FileModel) : boolean {
     return item.downloadUrl !== '';
   }
-
+  /**
+   * deleteRow(item)
+   */
+  public deleteRow(item: FileModel) {
+    const index = this.data.files.map((x: FileModel) => x.uniqueId).indexOf(item.uniqueId);
+    if (index > -1) {
+      this.data.files.splice(index, 1);
+    }
+  }
   public clickOnFileInput() {
     this.fileInput.nativeElement.click();
   }
@@ -98,10 +118,39 @@ export class FileSelectorDialogComponent implements OnInit {
   public get acceptableExtensions() : string {
     return this.configuration.acceptableExtensions;
   }
-  private clone(source: FileSelectorModel): FileSelectorModel {
+  
+  public get cancelButtonText() : string {
+    return this.configuration.translations['cancelButtonText'] ?? 'Cancel';
+  }
+  public get okButtonText() : string {
+    return this.configuration.translations['okButtonText'] ?? 'Ok';
+  }
+  public get attachButtonText() : string {
+    return this.configuration.translations['attachButtonText'] ?? 'Attach File';
+  }
+  public get cancelButtonColor() : string {
+    return this.configuration.translations['cancelButtonColor'] ?? '';
+  }
+  public get okButtonColor() : string {
+    return this.configuration.translations['okButtonColor'] ?? 'primary';
+  }
+  public get attachButtonColor() : string {
+    return this.configuration.translations['attachButtonColor'] ?? 'accent';
+  }
+  public get titleText() : string {
+    return this.configuration.translations['title'] ?? 'File Uloader Module!';
+  }
+  public get detailsText() : string {
+    return this.configuration.translations['text'] ?? '';
+  }
+
+  private clone(source: FileSelectorModel, keepUniqueId = false): FileSelectorModel {
       const files: FileModel[] = []
       source.files.forEach((file: FileModel) => {
         const newFile: FileModel = new FileModel(file.fileName, file.externalId, file.size, file.downloadUrl, file.content);
+        if (keepUniqueId) {
+          newFile['_uniqueId'] = file.uniqueId;
+        }
         files.push(newFile);
       })
       const model = new FileSelectorModel(files);

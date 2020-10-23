@@ -20,31 +20,54 @@ export class ExampleComponent implements OnInit {
   constructor(private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
+    
     const files = [];
+    // Test start
     const file1 = new FileModel('test1', 'asdfghjkl', 12);
     files.push(file1);
     const file2 = new FileModel('test2', 'qwertzuiop', 13);
     files.push(file2);
+    // Test end
+
+    // Setup file uploader module START
     this.initialFileSelectorModel = { files : files };
 
     let configTranslates: { [id: string] : string; } = {};
     configTranslates['buttonText'] = 'Attach Files';
 
+    let dialogConfigTranslates: { [id: string] : string; } = {};
+    dialogConfigTranslates['okButtonText'] = 'OK';
+    dialogConfigTranslates['cancelButtonText'] = 'Cancel';
+    dialogConfigTranslates['attachButtonText'] = 'Upload';
+    dialogConfigTranslates['okButtonText'] = 'OK';
+    dialogConfigTranslates['cancelButtonText'] = 'Cancel';
+    dialogConfigTranslates['attachButton'] = 'Upload';
+    dialogConfigTranslates['title'] = 'File selector module';
+    dialogConfigTranslates['text'] = 'Please select files for upload';
+
     this.configuration = {  
       badgeColor: 'accent',
       buttonColor: 'primary',
-      translates: configTranslates,
+      translations: configTranslates,
       dialogConfiguration: { 
               fileNumberLimit: 3, 
               acceptableExtensions: '.txt,.docx,.doc',
               maximumFileSize: 0,
-              maximumCombinedFileSize: 0
+              maximumCombinedFileSize: 0,
+              translations: dialogConfigTranslates
             } 
     } as Configuration;
+    // Setup file uploader module END
   }
   ngAfterViewInit(): void {
     // this.resultFileSelectorModel =  this.fileSelectorComponent.fileModels;
     // setTimeout(() => this.resultFileSelectorModel.files = this.fileSelectorComponent.fileModels.files, 0);
     this.cdr.detectChanges();
+  }
+  /**
+   * onValueChanges
+   */
+  public onValueChanges(newValue: FileSelectorModel) {
+    console.log(JSON.stringify(newValue));
   }
 }

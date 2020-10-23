@@ -1,8 +1,15 @@
 <h2 mat-dialog-title>
-    Fájlok kiválasztása
+    {{ titleText }}
 </h2>
 <mat-dialog-content>
-    <button mat-raised-button color="accent" (click)="clickOnFileInput()">Add File</button>
+    <!-- <mat-card>Simple card</mat-card> -->
+    <section *ngIf="detailsText" class="description">
+        {{ detailsText }}
+    </section>
+    <button mat-raised-button color="accent" (click)="clickOnFileInput()" class="upload-button" [color]="attachButtonColor">
+        <mat-icon>add</mat-icon>
+        {{ attachButtonText }}
+    </button>
     <input type="file" id="fileInput" #fileInput 
             (change)="handleFileInput($event.target.files)" 
             style="display: none;" 
@@ -12,11 +19,13 @@
     <!-- <div class="form-group">
         <input type="file" id="file" (change)="handleFileInput($event.target.files)">
     </div> -->
-    <div class="col-md-8 link-row"   *ngFor="let item of data.files;">
-        <a [href]="item.downloadUrl" [ngClass]="{'file-link' : isUrl(item)}">{{item.fileName}}</a> {{item.size | filesize}}
-    </div>
+    <section class="link-container">
+        <div class="col-md-8 link-row" *ngFor="let item of data.files;">
+            <span class="delete-icon-container" (click)="deleteRow(item)"><mat-icon>delete_outline</mat-icon></span><span class="file-info-line-container"><a [href]="item.downloadUrl" [ngClass]="{'file-link' : isUrl(item)}">{{item.fileName}}</a> {{item.size | filesize}}</span>
+        </div>
+    </section>
 </mat-dialog-content>
 <mat-dialog-actions>
-    <button mat-raised-button (click)="onCancel()">Cancel</button>
-    <button mat-raised-button (click)="onOk()" color="primary">Ok</button>
+    <button mat-raised-button (click)="onCancel()" [color]="cancelButtonColor">{{ cancelButtonText }}</button>
+    <button mat-raised-button (click)="onOk()" [color]="okButtonColor" [disabled]="saveDisabled">{{ okButtonText }}</button>
 </mat-dialog-actions>
