@@ -1,10 +1,13 @@
+import { FileModelStatus } from './../../enums/file-model-status.enum';
 import { FileSelectorDialogResult } from './../../models/file-selector-dialog-result.model';
 import { Guid } from './../../utilities/classes/Guid';
 import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DialogWrapperModel } from 'src/app/models/dialog-wrapper-model';
-import { FileModel, FileSelectorModel } from 'src/app/models/file-selector.model';
+import { FileSelectorModel } from 'src/app/models/file-selector.model';
+import { FileModel, ValidationModel } from "src/app/models/file.model";
 import { DialogConfiguration } from 'src/app/models/dialog-configuration';
+import { humanFileSize } from 'src/app/utilities/functions/display-file-size';
 
 @Component({
   selector: 'app-file-selector-dialog',
@@ -13,9 +16,7 @@ import { DialogConfiguration } from 'src/app/models/dialog-configuration';
 })
 export class FileSelectorDialogComponent implements OnInit {
   @ViewChild('fileInput') fileInput: ElementRef;
-
   private initialData: FileSelectorModel;
-  
   public get configuration() : DialogConfiguration {
     return this.inputInformation.configuration;
   }
@@ -38,42 +39,47 @@ export class FileSelectorDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.data = this.clone(this.inputInformation.fileSelectorModel);
-    // this.data = this.inputInformation.fileSelectorModel;
   }
 
   public handleFileInput(files: FileList) {
+    // this.initializeErrorsForUpload();
     for (let index = 0; index < files.length; index++) {
       const file = files[index];
-      if (this.configuration.maximumFileSize > 0 && file.size > this.configuration.maximumFileSize) {
-        // TODO
-        console.log('Maximum file size error');
-        break;
-      }
-
       const fileModel = new FileModel(file.name, '', file.size, Guid.newGuid());
-      fileModel.addFileContent(file);
+      const validateModel = this.getValidationModel();
+      fileModel.validateStatusAndAddFileContent(validateModel, file);
       this.data.files.push(fileModel);
-      console.log(`test: ${this.data.files.map(x => x.size).reduce((sum, current) => sum + current, 0)}`);
-      if (this.configuration.maximumCombinedFileSize > 0 &&
-        this.data.files.map(x => x.size).reduce((sum, current) => sum + current, 0) > this.configuration.maximumCombinedFileSize) {
-          // TODO
-          this.data.files.pop();
-          console.log('Maximum Combined file size error');
-          break;
-        }
     }
-    
-    // this.fileToUpload = files.item(0);
-    // Array.from(files).forEach(file => { 
-    //   if (this.configuration.maximumFileSize > 0 && file.size > this.configuration.maximumFileSize) {
-    //     // TODO
-    //     console.log('Maximum file size error');
-    //   }
-    //   const fileModel = new FileModel(file.name, '', file.size, Guid.newGuid());
-    //   fileModel.addFileContent(file);
-    //   this.data.files.push(fileModel);
-    //  });
   }
+
+  private getValidationModel(files: FileModel[] = null) {
+    if (!files) {
+      files =  this.data.files
+    }
+    return new ValidationModel(this.acceptableExtensionsForCheck,
+      this.configuration.maximumFileSize,
+      this.configuration.maximumCombinedFileSize,
+      this.configuration.fileNumberLimit,
+      this.actualCombinedFileSize(files),
+      files.filter((x: FileModel) => x.status === FileModelStatus.Ok).length);
+  }
+
+  public actualCombinedFileSize(files: FileModel[] = null) : number {
+    if (!files) {
+      files =  this.data.files
+    }
+    return files.filter((x) => x.status === FileModelStatus.Ok).map((x) => x.size).reduce((sum, current) => sum + current, 0);
+  }
+
+  public get acceptableExtensionsForCheck() : string[] {
+    return this.acceptableExtensions.split(',').map((x: string) => { return x.trim().replace('.', '').toLowerCase()});
+  }
+
+  // private initializeErrorsForUpload() {
+  //   this.tooLargeFileNames = [];
+  //   this.combinedSizeOverLimitFileNames = [];
+  //   this.fileExtesnionNotAcceptable = [];
+  // }
 
   public onOk(){
     this.dialogRef.close(new FileSelectorDialogResult(true, this.data));
@@ -83,20 +89,78 @@ export class FileSelectorDialogComponent implements OnInit {
     this.dialogRef.close(new FileSelectorDialogResult(false, this.data));
   }
   
+  public get filesInformation() : string {
+    let fileNumberPart = `Files selected: ${this.data.files.length}`;
+    if (this.configuration.fileNumberLimit > 0) {
+      fileNumberPart = fileNumberPart + `/${this.configuration.fileNumberLimit}`;
+    }
+    fileNumberPart = fileNumberPart + '. ';
+    let fileSizePart = `Approved files size: ${humanFileSize(this.actualCombinedFileSize())}`;
+    if (this.configuration.maximumCombinedFileSize) {
+      fileSizePart = fileSizePart + `/${humanFileSize(this.configuration.maximumCombinedFileSize)}`;
+    }
+    if (this.configuration.maximumFileSize > 0) {
+      fileSizePart = fileSizePart + `. Single file size maximum: ${humanFileSize(this.configuration.maximumFileSize)}`
+    }
+    return fileNumberPart + fileSizePart;
+  }
+  
   /**
    * saveDisabled
    */
   public get saveDisabled(): boolean {
-    return this.compareArrays(this.data.files.map((x: FileModel) => x.uniqueId), this.initialData.files.map((x: FileModel) => x.uniqueId));
+    let isDisabled = false;
+    if (this.compareArrays(this.data.files.map((x: FileModel) => x.uniqueId), this.initialData.files.map((x: FileModel) => x.uniqueId))) {
+      isDisabled = true;
+    }
+    if (!isDisabled && this.data.files.some((x) => !x.isValid)) {
+      isDisabled = true;
+    }
+    return isDisabled;
   }
+  
+  public get hasError() : boolean {
+    return this.data.files.some((x) => x.isError);
+  }
+  
   private compareArrays(array1: string[], array2: string[]): boolean {
     const array2Sorted = array2.slice().sort();
     return array1.length === array2.length && array1.slice().sort().every(function(value, index) {
         return value === array2Sorted[index];
     });
   }
-  public isUrl(item: FileModel) : boolean {
-    return item.downloadUrl !== '';
+  public isUrl(fileModel: FileModel) : boolean {
+    // return item.downloadUrl !== '';
+    return !fileModel.isError;
+  }
+  public isError(fileModel: FileModel): boolean {
+    return fileModel.isError;
+  }
+  public getErrorMessage(fileModel: FileModel): string {
+    if (fileModel.isError) {
+      switch (fileModel.status) {
+        case FileModelStatus.NotAllowedExtension:
+          return 'File extension not valid';
+        case FileModelStatus.TooBigFile:
+            return 'File size too big';
+        case FileModelStatus.TooBigCombinedFileSizes:
+          return 'File combined size too big';
+        case FileModelStatus.TooMuchCombinedFiles:
+          return 'Too much file selected';
+        default:
+          break;
+      }
+    }
+    
+  }
+  // private fileIsInErrorState(fileModel: FileModel): boolean {
+  //   return fileModel.status !== FileModelStatus.Ok &&  fileModel.status !== FileModelStatus.Initialized;
+  // }
+  public isInProcess(item: FileModel): boolean {
+    return item.status === FileModelStatus.Initialized;
+  }
+  downloadItem(item: FileModel) {
+    console.log('download item');
   }
   /**
    * deleteRow(item)
@@ -151,9 +215,19 @@ export class FileSelectorDialogComponent implements OnInit {
         if (keepUniqueId) {
           newFile['_uniqueId'] = file.uniqueId;
         }
+        const hasError = newFile.validateStatus(this.getValidationModel(files));
         files.push(newFile);
       })
       const model = new FileSelectorModel(files);
       return model;
   }
+  
+  public get combinedTooMuchOrTooBigError() : boolean {
+    return this.data.files.some((x) => x.status === FileModelStatus.TooBigCombinedFileSizes || x.status === FileModelStatus.TooMuchCombinedFiles);
+  }
+  
+  public get addFileDisabled() : boolean {
+    return this.combinedTooMuchOrTooBigError || this.configuration.fileNumberLimit > 0 && this.data.files.length >= this.configuration.fileNumberLimit;
+  }
+  
 }

@@ -1,7 +1,8 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { PRIMARY_OUTLET } from '@angular/router';
 import { Configuration } from 'src/app/models/configuration';
-import { FileModel, FileSelectorModel } from 'src/app/models/file-selector.model';
+import { FileSelectorModel } from 'src/app/models/file-selector.model';
+import { FileModel } from "src/app/models/file.model";
 import { FileSelectorComponent } from '../file-selector/file-selector.component';
 
 @Component({
@@ -23,9 +24,9 @@ export class ExampleComponent implements OnInit {
     
     const files = [];
     // Test start
-    const file1 = new FileModel('test1', 'asdfghjkl', 12);
+    const file1 = new FileModel('test1.txt', 'asdfghjkl', 12);
     files.push(file1);
-    const file2 = new FileModel('test2', 'qwertzuiop', 13);
+    const file2 = new FileModel('test2.txt', 'qwertzuiop', 13);
     files.push(file2);
     // Test end
 
@@ -52,8 +53,8 @@ export class ExampleComponent implements OnInit {
       dialogConfiguration: { 
               fileNumberLimit: 3, 
               acceptableExtensions: '.txt,.docx,.doc',
-              maximumFileSize: 0,
-              maximumCombinedFileSize: 0,
+              maximumFileSize: 10485760, // 10MB
+              maximumCombinedFileSize: 10485760, // 10MB
               translations: dialogConfigTranslates
             } 
     } as Configuration;

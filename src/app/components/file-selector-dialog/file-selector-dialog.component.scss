@@ -1,3 +1,8 @@
+$my-red: #e33124;
+
+.actual-files-information {
+    margin: 0px 15px;
+}
 .description {
     width: 90%; 
     background-color: lightgray;
@@ -15,13 +20,20 @@
     display: table-cell;
     width: 30px;
     .mat-icon{
-        transition: background-color 1s ease-out, color 1s ease-out;
+        transition: color .5s ease-in;
         border-radius: 5px;
     }
     .mat-icon:hover{
-        background-color: #e33124 !important;
-        color: #694a48 !important;
+        color: $my-red !important;
     }
+    // .mat-icon{
+    //     transition: background-color 1s ease-in, color 1s ease-in;
+    //     border-radius: 5px;
+    // }
+    // .mat-icon:hover{
+    //     background-color: #e33124 !important;
+    //     color: #694a48 !important;
+    // }
 }
 .file-info-line-container{
     display: table-cell;
@@ -33,4 +45,30 @@
 .link-container {
     padding: 5px;
     margin: 5px;
+}
+.file-info-line-container {
+    .file-error {
+        color: $my-red;
+        font-weight: 800;
+    }
+    .file-link{
+        cursor: pointer;
+    }
+    .file-in-progress {
+        color: blue;
+    }
+}
+.file-name{
+    color: green;
+}
+.file-link:hover{
+    text-decoration: underline;
+}
+.error-text {
+    margin-left: 2px;
+    color: $my-red;
+}
+.file-size{
+    margin-left: 2px;
+    font-weight: bolder;
 }

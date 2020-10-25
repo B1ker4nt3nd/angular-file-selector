@@ -6,10 +6,13 @@
     <section *ngIf="detailsText" class="description">
         {{ detailsText }}
     </section>
-    <button mat-raised-button color="accent" (click)="clickOnFileInput()" class="upload-button" [color]="attachButtonColor">
-        <mat-icon>add</mat-icon>
-        {{ attachButtonText }}
-    </button>
+    <div>
+        <button mat-raised-button color="accent" (click)="clickOnFileInput()" class="upload-button" [color]="attachButtonColor" [disabled]="addFileDisabled">
+            <mat-icon>add</mat-icon>
+            {{ attachButtonText }}
+        </button>
+        <span class="actual-files-information">{{ filesInformation }}</span>
+    </div>
     <input type="file" id="fileInput" #fileInput 
             (change)="handleFileInput($event.target.files)" 
             style="display: none;" 
@@ -21,11 +24,23 @@
     </div> -->
     <section class="link-container">
         <div class="col-md-8 link-row" *ngFor="let item of data.files;">
-            <span class="delete-icon-container" (click)="deleteRow(item)"><mat-icon>delete_outline</mat-icon></span><span class="file-info-line-container"><a [href]="item.downloadUrl" [ngClass]="{'file-link' : isUrl(item)}">{{item.fileName}}</a> {{item.size | filesize}}</span>
+            <span class="delete-icon-container" (click)="deleteRow(item)"><mat-icon>delete_outline</mat-icon></span>
+            <span class="file-info-line-container">
+                <span class="file-name" (click)="downloadItem(item)" [ngClass]="{'file-link':isUrl(item), 'file-error': isError(item), 'file-in-progress': isInProcess(item)}">{{item.fileName}}</span>
+                 <span class="file-size">({{ item.size | filesize }})</span>
+                 <span class="error-text" *ngIf="isError(item)">{{ getErrorMessage(item) }}</span>
+            </span>
         </div>
     </section>
+    <div class="row">
+        <p *ngIf="hasError">
+            <ngb-alert [dismissible]="false" type="danger">
+            <strong>Warning!</strong> Please check the files for error. After deletion of problematic items, you can save your changes.
+            </ngb-alert>
+        </p>
+    </div>
 </mat-dialog-content>
 <mat-dialog-actions>
-    <button mat-raised-button (click)="onCancel()" [color]="cancelButtonColor">{{ cancelButtonText }}</button>
-    <button mat-raised-button (click)="onOk()" [color]="okButtonColor" [disabled]="saveDisabled">{{ okButtonText }}</button>
+        <button mat-raised-button (click)="onCancel()" [color]="cancelButtonColor">{{ cancelButtonText }}</button>
+        <button mat-raised-button (click)="onOk()" [color]="okButtonColor" [disabled]="saveDisabled">{{ okButtonText }}</button>
 </mat-dialog-actions>
