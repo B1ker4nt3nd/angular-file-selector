@@ -70,7 +70,7 @@ export class FileModel {
             this._status = FileModelStatus.TooBigCombinedFileSizes;
             hasError = true;
         }
-        if (!hasError) {
+        if (!hasError && setStatusToOk) {
             this._status = FileModelStatus.Ok;
         }
         return hasError;
@@ -80,8 +80,8 @@ export class FileModel {
      * evaluatesStatusAndAddFileContent
      */
     public validateStatusAndAddFileContent(validationModel: ValidationModel, file: File) {
-        this.validateStatus(validationModel, false);
-        if (!this.isError) {
+        const hasError = this.validateStatus(validationModel, false);
+        if (!hasError) {
             this.addFileContent(file);
         }
     }
@@ -94,9 +94,12 @@ export class FileModel {
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.addEventListener('progress', (event) => {
+                console.log('progress');
                 if (event.loaded && event.total) {
                   // Calculate the percentage completed
                   const percent = (event.loaded / event.total) * 100;
+                  console.log(`progress: ${percent}`);
+                  
                   // Set the value to the progress component
                   this._progressPercentage = percent;
                 }

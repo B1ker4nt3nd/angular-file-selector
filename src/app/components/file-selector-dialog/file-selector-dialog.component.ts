@@ -61,7 +61,7 @@ export class FileSelectorDialogComponent implements OnInit {
       this.configuration.maximumCombinedFileSize,
       this.configuration.fileNumberLimit,
       this.actualCombinedFileSize(files),
-      files.filter((x: FileModel) => x.status === FileModelStatus.Ok).length);
+      files.filter((x: FileModel) => x.status === FileModelStatus.Ok || x.status === FileModelStatus.Initialized).length);
   }
 
   public actualCombinedFileSize(files: FileModel[] = null) : number {
@@ -227,7 +227,10 @@ export class FileSelectorDialogComponent implements OnInit {
   }
   
   public get addFileDisabled() : boolean {
-    return this.combinedTooMuchOrTooBigError || this.configuration.fileNumberLimit > 0 && this.data.files.length >= this.configuration.fileNumberLimit;
+    return this.data.files.some((x) => !x.isValid) || this.combinedTooMuchOrTooBigError || this.configuration.fileNumberLimit > 0 && this.data.files.length >= this.configuration.fileNumberLimit;
   }
   
+  public isInProgress(fileModel: FileModel) : boolean {
+    return fileModel.status === FileModelStatus.Initialized && fileModel.progressPercentage > 0 && fileModel.progressPercentage < 100;
+  }
 }

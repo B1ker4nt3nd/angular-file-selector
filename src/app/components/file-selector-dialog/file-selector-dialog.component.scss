@@ -72,3 +72,11 @@ $my-red: #e33124;
     margin-left: 2px;
     font-weight: bolder;
 }
+.progress-bar-container {
+    margin-left: -100px;
+    display: table-cell;
+    vertical-align: middle;
+    .progress-bar{
+        width: 150px;
+    }
+}

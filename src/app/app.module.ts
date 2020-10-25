@@ -16,6 +16,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DisplayFileSizePipe } from './utilities/pipes/display-file-size-pipe';
 import { ExampleComponent } from './components/example/example.component';
 import { MatCardModule } from '@angular/material/card';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { MatCardModule } from '@angular/material/card';
     MatIconModule,
     MatBadgeModule,
     MatDialogModule,
-    MatCardModule
+    MatCardModule,
+    MatProgressBarModule
   ],
   providers: [DisplayFileSizePipe],
   bootstrap: [AppComponent]
