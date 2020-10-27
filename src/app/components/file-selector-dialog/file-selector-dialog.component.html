@@ -2,7 +2,6 @@
     {{ titleText }}
 </h2>
 <mat-dialog-content>
-    <!-- <mat-card>Simple card</mat-card> -->
     <section *ngIf="detailsText" class="description">
         {{ detailsText }}
     </section>
@@ -17,11 +16,7 @@
             (change)="handleFileInput($event.target.files)" 
             style="display: none;" 
             [multiple]="isMultipleFileAllowed"
-            [accept]="acceptableExtensions"
-            >
-    <!-- <div class="form-group">
-        <input type="file" id="file" (change)="handleFileInput($event.target.files)">
-    </div> -->
+            [accept]="acceptableExtensions">
     <section class="link-container">
         <div class="col-md-8 link-row" *ngFor="let item of data.files;">
             <span class="delete-icon-container" (click)="deleteRow(item)"><mat-icon>delete_outline</mat-icon></span>
@@ -32,7 +27,6 @@
             </span>
             <span class="progress-bar-container">
                 <mat-progress-bar class="progress-bar" *ngIf="isInProgress(item)" mode="determinate" [value]="item.progressPercentage"></mat-progress-bar>
-                <!-- <mat-progress-bar class="progress-bar" mode="indeterminate"></mat-progress-bar> -->
             </span>
         </div>
     </section>

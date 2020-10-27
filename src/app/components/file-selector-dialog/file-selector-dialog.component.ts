@@ -40,9 +40,8 @@ export class FileSelectorDialogComponent implements OnInit {
   ngOnInit(): void {
     this.data = this.clone(this.inputInformation.fileSelectorModel);
   }
-
+  // PUBLIC METHODS START
   public handleFileInput(files: FileList) {
-    // this.initializeErrorsForUpload();
     for (let index = 0; index < files.length; index++) {
       const file = files[index];
       const fileModel = new FileModel(file.name, '', file.size, Guid.newGuid());
@@ -51,44 +50,21 @@ export class FileSelectorDialogComponent implements OnInit {
       this.data.files.push(fileModel);
     }
   }
-
-  private getValidationModel(files: FileModel[] = null) {
-    if (!files) {
-      files =  this.data.files
-    }
-    return new ValidationModel(this.acceptableExtensionsForCheck,
-      this.configuration.maximumFileSize,
-      this.configuration.maximumCombinedFileSize,
-      this.configuration.fileNumberLimit,
-      this.actualCombinedFileSize(files),
-      files.filter((x: FileModel) => x.status === FileModelStatus.Ok || x.status === FileModelStatus.Initialized).length);
-  }
-
   public actualCombinedFileSize(files: FileModel[] = null) : number {
     if (!files) {
       files =  this.data.files
     }
     return files.filter((x) => x.status === FileModelStatus.Ok).map((x) => x.size).reduce((sum, current) => sum + current, 0);
   }
-
   public get acceptableExtensionsForCheck() : string[] {
     return this.acceptableExtensions.split(',').map((x: string) => { return x.trim().replace('.', '').toLowerCase()});
   }
-
-  // private initializeErrorsForUpload() {
-  //   this.tooLargeFileNames = [];
-  //   this.combinedSizeOverLimitFileNames = [];
-  //   this.fileExtesnionNotAcceptable = [];
-  // }
-
   public onOk(){
     this.dialogRef.close(new FileSelectorDialogResult(true, this.data));
   }
-
   public onCancel(){
     this.dialogRef.close(new FileSelectorDialogResult(false, this.data));
   }
-  
   public get filesInformation() : string {
     let fileNumberPart = `Files selected: ${this.data.files.length}`;
     if (this.configuration.fileNumberLimit > 0) {
@@ -104,33 +80,8 @@ export class FileSelectorDialogComponent implements OnInit {
     }
     return fileNumberPart + fileSizePart;
   }
-  
-  /**
-   * saveDisabled
-   */
-  public get saveDisabled(): boolean {
-    let isDisabled = false;
-    if (this.compareArrays(this.data.files.map((x: FileModel) => x.uniqueId), this.initialData.files.map((x: FileModel) => x.uniqueId))) {
-      isDisabled = true;
-    }
-    if (!isDisabled && this.data.files.some((x) => !x.isValid)) {
-      isDisabled = true;
-    }
-    return isDisabled;
-  }
-  
-  public get hasError() : boolean {
-    return this.data.files.some((x) => x.isError);
-  }
-  
-  private compareArrays(array1: string[], array2: string[]): boolean {
-    const array2Sorted = array2.slice().sort();
-    return array1.length === array2.length && array1.slice().sort().every(function(value, index) {
-        return value === array2Sorted[index];
-    });
-  }
+
   public isUrl(fileModel: FileModel) : boolean {
-    // return item.downloadUrl !== '';
     return !fileModel.isError;
   }
   public isError(fileModel: FileModel): boolean {
@@ -151,20 +102,28 @@ export class FileSelectorDialogComponent implements OnInit {
           break;
       }
     }
-    
   }
-  // private fileIsInErrorState(fileModel: FileModel): boolean {
-  //   return fileModel.status !== FileModelStatus.Ok &&  fileModel.status !== FileModelStatus.Initialized;
-  // }
   public isInProcess(item: FileModel): boolean {
     return item.status === FileModelStatus.Initialized;
   }
-  downloadItem(item: FileModel) {
+  public downloadItem(item: FileModel) {
+    // if (item.content) {
+    //   const byteCharacters = atob(item.content);
+    //   const byteNumbers = new Array(byteCharacters.length);
+    //   for (let i = 0; i < byteCharacters.length; i++) {
+    //       byteNumbers[i] = byteCharacters.charCodeAt(i);
+    //   }
+    //   const byteArray = new Uint8Array(byteNumbers);
+
+    //   this.downloadFile(byteNumbers);
+    // }
     console.log('download item');
   }
-  /**
-   * deleteRow(item)
-   */
+  private downloadFile(data: Blob) {
+    const blob = new Blob([data], { type: 'text/csv' });
+    const url= window.URL.createObjectURL(blob);
+    window.open(url);
+  }
   public deleteRow(item: FileModel) {
     const index = this.data.files.map((x: FileModel) => x.uniqueId).indexOf(item.uniqueId);
     if (index > -1) {
@@ -174,15 +133,32 @@ export class FileSelectorDialogComponent implements OnInit {
   public clickOnFileInput() {
     this.fileInput.nativeElement.click();
   }
+  public isInProgress(fileModel: FileModel) : boolean {
+    return fileModel.status === FileModelStatus.Initialized && fileModel.progressPercentage > 0 && fileModel.progressPercentage < 100;
+  }
+  // PUBLIC METHODS END
+  //GETTERS START
+  public get saveDisabled(): boolean {
+    let isDisabled = false;
+    if (this.compareArrays(this.data.files.map((x: FileModel) => x.uniqueId), this.initialData.files.map((x: FileModel) => x.uniqueId))) {
+      isDisabled = true;
+    }
+    if (!isDisabled && this.data.files.some((x) => !x.isValid)) {
+      isDisabled = true;
+    }
+    return isDisabled;
+  }
   
+  public get hasError() : boolean {
+    return this.data.files.some((x) => x.isError);
+  }
+
   public get isMultipleFileAllowed() : boolean {
     return this.configuration.fileNumberLimit > 1;
   }
-  
   public get acceptableExtensions() : string {
     return this.configuration.acceptableExtensions;
   }
-  
   public get cancelButtonText() : string {
     return this.configuration.translations['cancelButtonText'] ?? 'Cancel';
   }
@@ -208,20 +184,6 @@ export class FileSelectorDialogComponent implements OnInit {
     return this.configuration.translations['text'] ?? '';
   }
 
-  private clone(source: FileSelectorModel, keepUniqueId = false): FileSelectorModel {
-      const files: FileModel[] = []
-      source.files.forEach((file: FileModel) => {
-        const newFile: FileModel = new FileModel(file.fileName, file.externalId, file.size, file.downloadUrl, file.content);
-        if (keepUniqueId) {
-          newFile['_uniqueId'] = file.uniqueId;
-        }
-        const hasError = newFile.validateStatus(this.getValidationModel(files));
-        files.push(newFile);
-      })
-      const model = new FileSelectorModel(files);
-      return model;
-  }
-  
   public get combinedTooMuchOrTooBigError() : boolean {
     return this.data.files.some((x) => x.status === FileModelStatus.TooBigCombinedFileSizes || x.status === FileModelStatus.TooMuchCombinedFiles);
   }
@@ -229,8 +191,39 @@ export class FileSelectorDialogComponent implements OnInit {
   public get addFileDisabled() : boolean {
     return this.data.files.some((x) => !x.isValid) || this.combinedTooMuchOrTooBigError || this.configuration.fileNumberLimit > 0 && this.data.files.length >= this.configuration.fileNumberLimit;
   }
-  
-  public isInProgress(fileModel: FileModel) : boolean {
-    return fileModel.status === FileModelStatus.Initialized && fileModel.progressPercentage > 0 && fileModel.progressPercentage < 100;
+  // GETTERS END
+
+  // PRIVATE METHODS START
+  private clone(source: FileSelectorModel, keepUniqueId = false): FileSelectorModel {
+    const files: FileModel[] = []
+    source.files.forEach((file: FileModel) => {
+      const newFile: FileModel = new FileModel(file.fileName, file.externalId, file.size, file.downloadUrl, file.content);
+      if (keepUniqueId) {
+        newFile['_uniqueId'] = file.uniqueId;
+      }
+      const hasError = newFile.validateStatus(this.getValidationModel(files));
+      files.push(newFile);
+    })
+    const model = new FileSelectorModel(files);
+    return model;
   }
+
+  private getValidationModel(files: FileModel[] = null) {
+    if (!files) {
+      files =  this.data.files
+    }
+    return new ValidationModel(this.acceptableExtensionsForCheck,
+      this.configuration.maximumFileSize,
+      this.configuration.maximumCombinedFileSize,
+      this.configuration.fileNumberLimit,
+      this.actualCombinedFileSize(files),
+      files.filter((x: FileModel) => x.status === FileModelStatus.Ok || x.status === FileModelStatus.Initialized).length);
+  }
+  private compareArrays(array1: string[], array2: string[]): boolean {
+    const array2Sorted = array2.slice().sort();
+    return array1.length === array2.length && array1.slice().sort().every(function(value, index) {
+        return value === array2Sorted[index];
+    });
+  }
+  // PRIVATE METHODS END
 }
