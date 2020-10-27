@@ -42,6 +42,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     MatProgressBarModule
   ],
   providers: [DisplayFileSizePipe],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  entryComponents:[FileSelectorDialogComponent]
 })
 export class AppModule { }
