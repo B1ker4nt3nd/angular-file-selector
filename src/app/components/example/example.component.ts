@@ -1,8 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
-import { PRIMARY_OUTLET } from '@angular/router';
-import { Configuration } from 'src/app/models/configuration';
-import { FileSelectorModel } from 'src/app/models/file-selector.model';
-import { FileModel } from "src/app/models/file.model";
+import { FileSelectorModel } from '../../models/file-selector.model';
+import { Configuration } from '../../models/configuration';
+import { FileModel } from "../../models/file.model";
 import { FileSelectorComponent } from '../file-selector/file-selector.component';
 
 @Component({

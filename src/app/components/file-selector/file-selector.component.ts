@@ -1,11 +1,10 @@
-import { DialogWrapperModel } from 'src/app/models/dialog-wrapper-model';
-import { FileSelectorModel } from './../../models/file-selector.model';
-import { FileModel } from "../../models/file.model";
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FileSelectorDialogComponent } from '../file-selector-dialog/file-selector-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { Configuration } from 'src/app/models/configuration';
-import { FileSelectorDialogResult } from 'src/app/models/file-selector-dialog-result.model';
+import { Configuration } from './../../models/configuration';
+import { DialogWrapperModel } from './../../models/dialog-wrapper-model';
+import { FileSelectorDialogResult } from './../../models/file-selector-dialog-result.model';
+import { FileSelectorDialogComponent } from '../file-selector-dialog/file-selector-dialog.component';
+import { FileSelectorModel } from './../../models/file-selector.model';
 
 @Component({
   selector: 'app-file-selector',

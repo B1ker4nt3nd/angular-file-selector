@@ -3,11 +3,11 @@ import { FileSelectorDialogResult } from './../../models/file-selector-dialog-re
 import { Guid } from './../../utilities/classes/Guid';
 import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { DialogWrapperModel } from 'src/app/models/dialog-wrapper-model';
-import { FileSelectorModel } from 'src/app/models/file-selector.model';
-import { FileModel, ValidationModel } from "src/app/models/file.model";
-import { DialogConfiguration } from 'src/app/models/dialog-configuration';
-import { humanFileSize } from 'src/app/utilities/functions/display-file-size';
+import { DialogWrapperModel } from '../../models/dialog-wrapper-model';
+import { FileSelectorModel } from '../../models/file-selector.model';
+import { FileModel, ValidationModel } from "../../models/file.model";
+import { DialogConfiguration } from './../../models/dialog-configuration';
+import { humanFileSize } from './../../utilities/functions/display-file-size';
 
 @Component({
   selector: 'app-file-selector-dialog',
