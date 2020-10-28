@@ -17,6 +17,7 @@ import { DisplayFileSizePipe } from './utilities/pipes/display-file-size-pipe';
 import { ExampleComponent } from './components/example/example.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { DragandDropDirective } from './directives/dragndrop.directive';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     FileSelectorComponent,
     FileSelectorDialogComponent,
     DisplayFileSizePipe,
-    ExampleComponent
+    ExampleComponent,
+    DragandDropDirective
   ],
   imports: [
     CommonModule,

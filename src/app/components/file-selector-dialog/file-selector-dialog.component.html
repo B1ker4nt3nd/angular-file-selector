@@ -5,7 +5,7 @@
     <section *ngIf="detailsText" class="description">
         {{ detailsText }}
     </section>
-    <div>
+    <div class="dragndrop" appDragDrop (onFileDropped)="handleFileInput($event)">
         <button mat-raised-button color="accent" (click)="clickOnFileInput()" class="upload-button" [color]="attachButtonColor" [disabled]="addFileDisabled">
             <mat-icon>add</mat-icon>
             {{ attachButtonText }}

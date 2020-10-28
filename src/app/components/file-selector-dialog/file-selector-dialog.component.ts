@@ -16,6 +16,7 @@ import { humanFileSize } from './../../utilities/functions/display-file-size';
 })
 export class FileSelectorDialogComponent implements OnInit {
   @ViewChild('fileInput') fileInput: ElementRef;
+
   private initialData: FileSelectorModel;
   public get configuration() : DialogConfiguration {
     return this.inputInformation.configuration;
