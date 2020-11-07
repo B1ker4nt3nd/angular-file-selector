@@ -45,9 +45,10 @@ export class FileSelectorDialogComponent implements OnInit {
   public handleFileInput(files: FileList) {
     for (let index = 0; index < files.length; index++) {
       const file = files[index];
-      const fileModel = new FileModel(file.name, '', file.size, Guid.newGuid());
+      const fileModel = new FileModel(file.name, '', file.size, Guid.newGuid(), file);
       const validateModel = this.getValidationModel();
-      fileModel.validateStatusAndAddFileContent(validateModel, file);
+      // fileModel.validateStatusAndAddFileContent(validateModel, file);
+      fileModel.validateStatus(validateModel);
       this.data.files.push(fileModel);
     }
   }
@@ -130,6 +131,12 @@ export class FileSelectorDialogComponent implements OnInit {
     if (index > -1) {
       this.data.files.splice(index, 1);
     }
+    if (this.hasError) {
+      this.data.files.forEach((fileModel: FileModel) => {
+        const validateModel = this.getValidationModel();
+        fileModel.validateStatus(validateModel);
+      });
+    }
   }
   public clickOnFileInput() {
     this.fileInput.nativeElement.click();
@@ -138,7 +145,7 @@ export class FileSelectorDialogComponent implements OnInit {
     return fileModel.status === FileModelStatus.Initialized && fileModel.progressPercentage > 0 && fileModel.progressPercentage < 100;
   }
   // PUBLIC METHODS END
-  //GETTERS START
+  // PROPERTIES START
   public get saveDisabled(): boolean {
     let isDisabled = false;
     if (this.compareArrays(this.data.files.map((x: FileModel) => x.uniqueId), this.initialData.files.map((x: FileModel) => x.uniqueId))) {
@@ -149,17 +156,22 @@ export class FileSelectorDialogComponent implements OnInit {
     }
     return isDisabled;
   }
-  
   public get hasError() : boolean {
     return this.data.files.some((x) => x.isError);
   }
-
   public get isMultipleFileAllowed() : boolean {
     return this.configuration.fileNumberLimit > 1;
   }
   public get acceptableExtensions() : string {
     return this.configuration.acceptableExtensions;
+  }  
+  public get combinedTooMuchOrTooBigError() : boolean {
+    return this.data.files.some((x) => x.status === FileModelStatus.TooBigCombinedFileSizes || x.status === FileModelStatus.TooMuchCombinedFiles);
   }
+  public get addFileDisabled() : boolean {
+    return this.data.files.some((x) => !x.isValid) || this.combinedTooMuchOrTooBigError || this.configuration.fileNumberLimit > 0 && this.data.files.length >= this.configuration.fileNumberLimit;
+  }
+  // TRANSLATIONS START
   public get cancelButtonText() : string {
     return this.configuration.translations['cancelButtonText'] ?? 'Cancel';
   }
@@ -184,21 +196,14 @@ export class FileSelectorDialogComponent implements OnInit {
   public get detailsText() : string {
     return this.configuration.translations['text'] ?? '';
   }
-
-  public get combinedTooMuchOrTooBigError() : boolean {
-    return this.data.files.some((x) => x.status === FileModelStatus.TooBigCombinedFileSizes || x.status === FileModelStatus.TooMuchCombinedFiles);
-  }
-  
-  public get addFileDisabled() : boolean {
-    return this.data.files.some((x) => !x.isValid) || this.combinedTooMuchOrTooBigError || this.configuration.fileNumberLimit > 0 && this.data.files.length >= this.configuration.fileNumberLimit;
-  }
-  // GETTERS END
+  // TRANSLATIONS END
+  // PROPERTIES END
 
   // PRIVATE METHODS START
   private clone(source: FileSelectorModel, keepUniqueId = false): FileSelectorModel {
     const files: FileModel[] = []
     source.files.forEach((file: FileModel) => {
-      const newFile: FileModel = new FileModel(file.fileName, file.externalId, file.size, file.downloadUrl, file.content);
+      const newFile: FileModel = new FileModel(file.fileName, file.externalId, file.size, file.downloadUrl, file.file);
       if (keepUniqueId) {
         newFile['_uniqueId'] = file.uniqueId;
       }

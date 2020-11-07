@@ -52,10 +52,10 @@ export class ExampleComponent implements OnInit {
       dialogConfiguration: { 
               fileNumberLimit: 5, 
               acceptableExtensions: '.txt,.docx,.doc',
-              maximumFileSize: 0,
-              maximumCombinedFileSize: 0,
-              // maximumFileSize: 10485760, // 10MB
-              // maximumCombinedFileSize: 10485760, // 10MB
+              // maximumFileSize: 0,
+              // maximumCombinedFileSize: 0,
+              maximumFileSize: 10485760, // 10MB
+              maximumCombinedFileSize: 10485760, // 10MB
               translations: dialogConfigTranslates
             } 
     } as Configuration;

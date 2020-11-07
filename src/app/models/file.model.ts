@@ -1,15 +1,16 @@
+import { Subject } from 'rxjs/internal/Subject';
 import { FileModelStatus } from '../enums/file-model-status.enum';
 import { Guid } from '../utilities/classes/Guid';
 
 
 export class FileModel {
-    constructor(fileName: string, externalId: string, size = 0, downloadUrl = null, content: string | ArrayBuffer = null) {
+    constructor(fileName: string, externalId: string, size = 0, downloadUrl = null, file: File = null) {
         this._name = fileName;
         this._externalId = externalId;
         this._uniqueId = Guid.newGuid();
         this._size = size;
         this._downloadUrl = downloadUrl;
-        this._content = content;
+        this._file = file;
         this._status = FileModelStatus.Initialized;
     }
     private _name: string;
@@ -27,16 +28,18 @@ export class FileModel {
     private _downloadUrl: string;
     public get downloadUrl(): string { return this._downloadUrl; }
 
-    private _content: string | ArrayBuffer;
-    public get content(): string | ArrayBuffer { return this._content; }
-
+    // private _content: string | ArrayBuffer;
+    // public get content(): string | ArrayBuffer { return this._content; }
+    private _file: File;
+    public get file(): File { return this._file; }
+    
     private _status: FileModelStatus;
     public get status(): FileModelStatus { return this._status; }
+
     
     public get fileExtension() : string {
         return this.fileName.split('.').pop().trim().toLowerCase();
     }
-    
 
     private _progressPercentage : number = 0;
     public get progressPercentage() : number {
@@ -52,7 +55,7 @@ export class FileModel {
     /**
      * validateStatus
      */
-    public validateStatus(validationModel: ValidationModel, setStatusToOk = true): boolean {
+    public validateStatus(validationModel: ValidationModel): boolean {
         let hasError = false;
         if (!validationModel.acceptableExtensions.includes(this.fileExtension)) {
           this._status = FileModelStatus.NotAllowedExtension;
@@ -70,27 +73,33 @@ export class FileModel {
             this._status = FileModelStatus.TooBigCombinedFileSizes;
             hasError = true;
         }
-        if (!hasError && setStatusToOk) {
+        if (!hasError) {
             this._status = FileModelStatus.Ok;
         }
         return hasError;
     }
-
+    /**
+     * validateStatusAndAddFile
+     */
+    public validateStatusAndAddFile(validationModel: ValidationModel, file: File) {
+        
+    }
     /**
      * evaluatesStatusAndAddFileContent
      */
-    public validateStatusAndAddFileContent(validationModel: ValidationModel, file: File) {
-        const hasError = this.validateStatus(validationModel, false);
-        if (!hasError) {
-            this.addFileContent(file);
-        }
-    }
+    // public validateStatusAndAddFileContent(validationModel: ValidationModel, file: File) {
+    //     const hasError = this.validateStatus(validationModel, false);
+    //     if (!hasError) {
+    //         this.getFileContent(file).subscribe(x=> {});
+    //     }
+    // }
 
     /**
      * addFileContent
      */
-    public addFileContent(file: File) {
+    public getFileContent(file: File): Subject<string | ArrayBuffer> {
         if (!this.isError) {
+            const subject = new Subject<string | ArrayBuffer>();
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.addEventListener('progress', (event) => {
@@ -106,9 +115,12 @@ export class FileModel {
             });
             // Once loaded, do something with the string
             reader.addEventListener('load', (event) => {
-                this._content = event.target.result;
-                this._status = FileModelStatus.Ok;
+                subject.next(event.target.result);
+                // this._content = event.target.result;
+                // this._status = FileModelStatus.Ok;
+                // return event.target.result;
             });
+            return subject;
         }
     }
 }
